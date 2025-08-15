@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golden Hand's Furniture Repair</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="controlPanel">
+    <h3>Control Panel</h3>
+    <label>Header Color: <input type="color" id="headerColor"></label><br>
+    <label>Background Color: <input type="color" id="bgColor"></label><br>
+    <label>Text Color: <input type="color" id="textColor"></label><br>
+    <label>Font Size (px): <input type="number" id="fontSize" min="10" max="50"></label><br>
+    <label>Font Family: 
+        <select id="fontFamily">
+            <option value="Arial">Arial</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Tahoma">Tahoma</option>
+        </select>
+    </label><br>
+    <button id="resetPanel">Reset</button>
+</div>
+
+<header>
+    <h1 id="siteTitle">Golden Hand's Furniture Repair</h1>
+    <p id="siteTagline">Expert furniture repair & restoration</p>
+    <div>
+        <label>Upload Logo: <input type="file" id="logoUpload" accept="image/*"></label><br>
+        <img id="logoPreview" src="" alt="Logo Preview" class="logo" style="max-width:150px; display:none;">
+    </div>
+</header>
+
+<section id="about">
+    <h2>About Us</h2>
+    <textarea id="aboutText">Golden Hand's Furniture Repair provides top-quality restoration and repair services for all types of furniture. We treat every piece like it’s our own!</textarea>
+</section>
+
+<section id="gallery">
+    <h2>Our Work</h2>
+    <div>
+        <label>Upload Furniture Images: <input type="file" id="galleryUpload" accept="image/*" multiple></label>
+    </div>
+    <div class="gallery-container" id="galleryContainer"></div>
+</section>
+
+<section id="contact">
+    <h2>Contact Us</h2>
+    <textarea id="contactText">Email: info@goldenhand.com
+Phone: (123) 456-7890
+Location: Your City, Your State</textarea>
+</section>
+
+<footer>
+    <p>&copy; 2025 Golden Hand's Furniture Repair</p>
+</footer>
+
+<script>
+// --- Logo Upload ---
+const logoUpload = document.getElementById('logoUpload');
+const logoPreview = document.getElementById('logoPreview');
+logoUpload.addEventListener('change', () => {
+    const file = logoUpload.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = e => {
+            logoPreview.src = e.target.result;
+            logoPreview.style.display = 'block';
+            localStorage.setItem('logo', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    }
+});
+if(localStorage.getItem('logo')){
+    logoPreview.src = localStorage.getItem('logo');
+    logoPreview.style.display = 'block';
+}
+
+// --- Gallery Upload ---
+const galleryUpload = document.getElementById('galleryUpload');
+const galleryContainer = document.getElementById('galleryContainer');
+galleryUpload.addEventListener('change', () => {
+    galleryContainer.innerHTML = '';
+    const filesData = [];
+    Array.from(galleryUpload.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '300px';
+            img.style.height = '200px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '10px';
+            img.style.margin = '10px';
+            galleryContainer.appendChild(img);
+            filesData.push(e.target.result);
+            localStorage.setItem('gallery', JSON.stringify(filesData));
+        };
+        reader.readAsDataURL(file);
+    });
+});
+if(localStorage.getItem('gallery')){
+    const saved = JSON.parse(localStorage.getItem('gallery'));
+    saved.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.width = '300px';
+        img.style.height = '200px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '10px';
+        img.style.margin = '10px';
+        galleryContainer.appendChild(img);
+    });
+}
+
+// --- Editable Text ---
+const aboutText = document.getElementById('aboutText');
+const contactText = document.getElementById('contactText');
+aboutText.addEventListener('input', () => localStorage.setItem('aboutText', aboutText.value));
+contactText.addEventListener('input', () => localStorage.setItem('contactText', contactText.value));
+if(localStorage.getItem('aboutText')) aboutText.value = localStorage.getItem('aboutText');
+if(localStorage.getItem('contactText')) contactText.value = localStorage.getItem('contactText');
+
+// --- Control Panel ---
+const headerColor = document.getElementById('headerColor');
+const bgColor = document.getElementById('bgColor');
+const textColor = document.getElementById('textColor');
+const fontSize = document.getElementById('fontSize');
+const fontFamily = document.getElementById('fontFamily');
+const resetBtn = document.getElementById('resetPanel');
+
+function applySettings(){
+    document.querySelector('header').style.backgroundColor = headerColor.value;
+    document.body.style.backgroundColor = bgColor.value;
+    document.body.style.color = textColor.value;
+    document.body.style.fontSize = fontSize.value + 'px';
+    document.body.style.fontFamily = fontFamily.value;
+    // Save settings
+    const settings = {
+        headerColor: headerColor.value,
+        bgColor: bgColor.value,
+        textColor: textColor.value,
+        fontSize: fontSize.value,
+        fontFamily: fontFamily.value
+    };
+    localStorage.setItem('settings', JSON.stringify(settings));
+}
+
+// Load saved settings
+if(localStorage.getItem('settings')){
+    const saved = JSON.parse(localStorage.getItem('settings'));
+    headerColor.value = saved.headerColor;
+    bgColor.value = saved.bgColor;
+    textColor.value = saved.textColor;
+    fontSize.value = saved.fontSize;
+    fontFamily.value = saved.fontFamily;
+    applySettings();
+}
+
+// Event listeners
+headerColor.addEventListener('input', applySettings);
+bgColor.addEventListener('input', applySettings);
+textColor.addEventListener('input', applySettings);
+fontSize.addEventListener('input', applySettings);
+fontFamily.addEventListener('change', applySettings);
+
+// Reset button
+resetBtn.addEventListener('click', () => {
+    localStorage.clear();
+    location.reload();
+});
+</script>
+</body>
+</html>
