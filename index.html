@@ -41,15 +41,37 @@
 <section id="gallery">
     <h2>Our Work</h2>
     <div>
-        <label>Upload Furniture Images: <input type="file" id="galleryUpload" accept="image/*" multiple></label>
+        <label>Select Category: 
+            <select id="photoCategory">
+                <option value="general">General Furniture Repair</option>
+                <option value="wood">Wood Touch-ups & Refinishing</option>
+                <option value="drywall">Drywall & Trim Repair</option>
+            </select>
+        </label>
+        <label>Upload Images: 
+            <input type="file" id="galleryUpload" accept="image/*" multiple>
+        </label>
     </div>
-    <div class="gallery-container" id="galleryContainer"></div>
+    <div id="categoryContainers" style="display:flex; gap:20px; margin-top:20px;">
+        <div class="category-column">
+            <h3>General Furniture Repair</h3>
+            <div class="gallery-container" id="generalContainer"></div>
+        </div>
+        <div class="category-column">
+            <h3>Wood Touch-ups & Refinishing</h3>
+            <div class="gallery-container" id="woodContainer"></div>
+        </div>
+        <div class="category-column">
+            <h3>Drywall & Trim Repair</h3>
+            <div class="gallery-container" id="drywallContainer"></div>
+        </div>
+    </div>
 </section>
 
 <section id="contact">
     <h2>Contact Us</h2>
     <textarea id="contactText">Email: info@goldenhand.com
-Phone: (810) 610-0875
+Phone: (810) 618-0875
 Location: Michigan</textarea>
 </section>
 
@@ -80,39 +102,50 @@ if(localStorage.getItem('logo')){
 
 // --- Gallery Upload ---
 const galleryUpload = document.getElementById('galleryUpload');
-const galleryContainer = document.getElementById('galleryContainer');
+const photoCategory = document.getElementById('photoCategory');
+
+const generalContainer = document.getElementById('generalContainer');
+const woodContainer = document.getElementById('woodContainer');
+const drywallContainer = document.getElementById('drywallContainer');
+
+function addImageToCategory(container, src) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width = '200px';
+    img.style.height = '150px';
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = '10px';
+    img.style.margin = '10px';
+    container.appendChild(img);
+}
+
 galleryUpload.addEventListener('change', () => {
-    galleryContainer.innerHTML = '';
-    const filesData = [];
+    const selectedCategory = photoCategory.value;
+    const containersMap = {
+        'general': generalContainer,
+        'wood': woodContainer,
+        'drywall': drywallContainer
+    };
+
     Array.from(galleryUpload.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.style.width = '300px';
-            img.style.height = '200px';
-            img.style.objectFit = 'cover';
-            img.style.borderRadius = '10px';
-            img.style.margin = '10px';
-            galleryContainer.appendChild(img);
-            filesData.push(e.target.result);
-            localStorage.setItem('gallery', JSON.stringify(filesData));
+            addImageToCategory(containersMap[selectedCategory], e.target.result);
+
+            const stored = JSON.parse(localStorage.getItem('galleryData') || '{}');
+            if(!stored[selectedCategory]) stored[selectedCategory] = [];
+            stored[selectedCategory].push(e.target.result);
+            localStorage.setItem('galleryData', JSON.stringify(stored));
         };
         reader.readAsDataURL(file);
     });
 });
-if(localStorage.getItem('gallery')){
-    const saved = JSON.parse(localStorage.getItem('gallery'));
-    saved.forEach(src => {
-        const img = document.createElement('img');
-        img.src = src;
-        img.style.width = '300px';
-        img.style.height = '200px';
-        img.style.objectFit = 'cover';
-        img.style.borderRadius = '10px';
-        img.style.margin = '10px';
-        galleryContainer.appendChild(img);
-    });
+
+if(localStorage.getItem('galleryData')) {
+    const saved = JSON.parse(localStorage.getItem('galleryData'));
+    if(saved.general) saved.general.forEach(src => addImageToCategory(generalContainer, src));
+    if(saved.wood) saved.wood.forEach(src => addImageToCategory(woodContainer, src));
+    if(saved.drywall) saved.drywall.forEach(src => addImageToCategory(drywallContainer, src));
 }
 
 // --- Editable Text ---
