@@ -51,3 +51,14 @@ footer {
     text-align: center;
     padding: 20px;
 }
+#categoryContainers {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+.category-column {
+    flex: 1;
+}
+.category-column h3 {
+    text-align: center;
+}
